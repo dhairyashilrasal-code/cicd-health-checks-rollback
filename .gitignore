@@ -17,3 +17,10 @@ override.tf.json
 # Sensitive files
 credentials
 secrets/
+
+# Python virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
