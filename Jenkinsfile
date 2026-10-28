@@ -1,11 +1,10 @@
-
 pipeline {
     agent any
 
     stages {
         stage('Checkout') {
             steps {
-                echo 'Source code is available in the workspace.'
+                echo 'Source code checked out from GitHub.'
             }
         }
 
@@ -23,6 +22,18 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t cicd-health-app:${BUILD_NUMBER} .'
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                sh '''
+                    docker rm -f cicd-health-app || true
+                    docker run -d \
+                      --name cicd-health-app \
+                      -p 5000:5000 \
+                      cicd-health-app:${BUILD_NUMBER}
+                '''
             }
         }
     }
