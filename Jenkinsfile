@@ -36,5 +36,31 @@ pipeline {
                 '''
             }
         }
+
+        stage('Health Check and Rollback') {
+            steps {
+                sh '''
+                    set +e
+                    HEALTHY=0
+
+                    for i in $(seq 1 10); do
+                        if curl -fsS http://localhost:5000/health \
+                            | grep -q '"status":"healthy"'; then
+                            HEALTHY=1
+                            break
+                        fi
+                        sleep 3
+                    done
+
+                    if [ "$HEALTHY" -eq 1 ]; then
+                        echo "Health check passed."
+                    else
+                        echo "Health check failed. Starting rollback."
+                        docker rm -f cicd-health-app || true
+                        exit 1
+                    fi
+                '''
+            }
+        }
     }
 }
